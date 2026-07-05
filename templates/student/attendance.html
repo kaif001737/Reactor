@@ -1,0 +1,213 @@
+{% extends 'base.html' %}
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block title %}Attendance Report | MeasiConnect{% endblock %}
+{% block section_title %}Attendance Analytics{% endblock %}
+
+{% block content %}
+<div class="space-y-8 max-w-6xl mx-auto">
+    <!-- Header Summary -->
+    <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200/60 dark:border-slate-700/50 shadow-sm">
+        <h1 class="text-xl font-black text-slate-800 dark:text-white">Your Course Engagement Analysis</h1>
+        <p class="text-slate-500 dark:text-slate-400 text-xs mt-1">Detailed logs, subject breakdown metrics, and daily hour-to-hour records for MCA Semester {{ current_user.semester }}.</p>
+    </div>
+
+    {% if subject_stats %}
+    <!-- Chart & Subject breakdown logs -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- Left: Subject breakdown logs -->
+        <div class="lg:col-span-2 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/60 dark:border-slate-700/50 shadow-sm p-6 space-y-6">
+            <h3 class="font-black text-slate-800 dark:text-white text-md border-b border-slate-100 dark:border-slate-700/60 pb-3">Subject-wise Logs</h3>
+            
+            <div class="space-y-4">
+                {% for item in subject_stats %}
+                <div class="p-4 bg-slate-50 dark:bg-slate-900/35 border border-slate-100 dark:border-slate-800 rounded-2xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div class="space-y-1">
+                        <h4 class="font-extrabold text-xs text-slate-800 dark:text-slate-200">{{ item.subject }}</h4>
+                        <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">
+                            Total: {{ item.total }} | Present: {{ item.present }} | Absent: {{ item.absent }} | Late: {{ item.late }}
+                        </p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <!-- Progress bar -->
+                        <div class="w-24 bg-slate-200 dark:bg-slate-700 rounded-full h-2">
+                            <div class="h-2 rounded-full {% if item.percentage >= 75 %}bg-emerald-500{% else %}bg-rose-500{% endif %}" style="width: {{ item.percentage }}%"></div>
+                        </div>
+                        <span class="inline-block px-2.5 py-1 text-[10px] font-black rounded-lg {% if item.percentage >= 75 %}bg-emerald-100 text-emerald-800 dark:bg-emerald-950/20 dark:text-emerald-400{% else %}bg-rose-100 text-rose-800 dark:bg-rose-950/20 dark:text-rose-400{% endif %}">
+                            {{ item.percentage }}%
+                        </span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Right: Chart breakdown -->
+        <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/60 dark:border-slate-700/50 shadow-sm p-6 flex flex-col justify-between hover-card">
+            <h3 class="font-black text-slate-800 dark:text-white text-md mb-4 border-b border-slate-100 dark:border-slate-700/60 pb-3">Course Engagement Rates</h3>
+            <div class="relative h-64 flex-1">
+                <canvas id="studentAttendanceChart"></canvas>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Hour-to-hour Daily Calendar Grid (New Feature!) -->
+    <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/60 dark:border-slate-700/50 shadow-sm overflow-hidden">
+        <div class="px-6 py-5 border-b border-slate-200/60 dark:border-slate-700/60 flex justify-between items-center">
+            <h3 class="font-black text-slate-800 dark:text-white text-md">Daily Hour-to-Hour History</h3>
+            <span class="text-[10px] text-slate-400 font-bold uppercase">Last 15 Academic Days</span>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs border-collapse">
+                <thead>
+                    <tr class="bg-slate-50 dark:bg-slate-900/40 border-b border-slate-200/60 dark:border-slate-700/60 text-slate-400 font-black uppercase tracking-wider">
+                        <th class="px-6 py-4">Date</th>
+                        <th class="px-4 py-4 text-center">Hour 1</th>
+                        <th class="px-4 py-4 text-center">Hour 2</th>
+                        <th class="px-4 py-4 text-center">Hour 3</th>
+                        <th class="px-4 py-4 text-center">Hour 4</th>
+                        <th class="px-4 py-4 text-center">Hour 5</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50 font-medium">
+                    {% for day in sorted_daily %}
+                    <tr class="text-slate-600 dark:text-slate-300 hover:bg-slate-50/50 dark:hover:bg-slate-700/10">
+                        <td class="px-6 py-4 font-bold text-slate-800 dark:text-slate-100">
+                            {{ day.date }}
+                        </td>
+                        {% for h in range(1, 6) %}
+                        {% set slot = day.hours[h] %}
+                        <td class="px-4 py-4 text-center">
+                            <span class="inline-flex flex-col items-center">
+                                <span class="w-6 h-6 rounded-full flex items-center justify-center font-black text-[9px] uppercase shadow-sm
+                                    {% if slot.status == 'present' %}bg-emerald-500 text-white
+                                    {% elif slot.status == 'late' %}bg-amber-500 text-white
+                                    {% elif slot.status == 'absent' %}bg-rose-500 text-white
+                                    {% else %}bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500{% endif %}"
+                                    title="Subject: {{ slot.subject or 'Free' }}">
+                                    {% if slot.status == 'present' %}P
+                                    {% elif slot.status == 'late' %}L
+                                    {% elif slot.status == 'absent' %}A
+                                    {% else %}-{% endif %}
+                                </span>
+                                {% if slot.subject %}
+                                <span class="text-[8px] text-slate-400 dark:text-slate-500 mt-1 max-w-[80px] truncate block" title="{{ slot.subject }}">{{ slot.subject }}</span>
+                                {% endif %}
+                            </span>
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Raw Attendance Journal -->
+    <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/60 dark:border-slate-700/50 shadow-sm overflow-hidden">
+        <div class="px-6 py-5 border-b border-slate-200/60 dark:border-slate-700/60">
+            <h3 class="font-black text-slate-800 dark:text-white text-md">Detailed Attendance Journal</h3>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs border-collapse">
+                <thead>
+                    <tr class="bg-slate-50 dark:bg-slate-900/40 border-b border-slate-200/60 dark:border-slate-700/60 text-slate-400 font-black uppercase tracking-wider">
+                        <th class="px-6 py-4">Date</th>
+                        <th class="px-6 py-4">Hour</th>
+                        <th class="px-6 py-4">Subject</th>
+                        <th class="px-6 py-4">Instructor</th>
+                        <th class="px-6 py-4 text-center">Status</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50 font-medium">
+                    {% for rec in records %}
+                    <tr class="text-slate-600 dark:text-slate-300">
+                        <td class="px-6 py-4 font-bold text-slate-800 dark:text-slate-100">
+                            {{ rec.date.strftime('%Y-%m-%d') if rec.date else 'N/A' }}
+                        </td>
+                        <td class="px-6 py-4">
+                            Hour {{ rec.hour or 1 }}
+                        </td>
+                        <td class="px-6 py-4 text-slate-800 dark:text-slate-200 font-bold">
+                            {{ rec.subject }}
+                        </td>
+                        <td class="px-6 py-4 text-slate-500 dark:text-slate-400">
+                            {{ rec.marked_name }}
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            <span class="inline-block px-2.5 py-1 rounded-xl text-[9px] font-black uppercase tracking-wider
+                                {% if rec.status == 'present' %}bg-emerald-100 text-emerald-800 dark:bg-emerald-950/20 dark:text-emerald-400
+                                {% elif rec.status == 'late' %}bg-amber-100 text-amber-800 dark:bg-amber-950/20 dark:text-amber-400
+                                {% else %}bg-rose-100 text-rose-800 dark:bg-rose-950/20 dark:text-rose-400{% endif %} capitalize">
+                                {{ rec.status }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% else %}
+    <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/60 dark:border-slate-700/50 shadow-sm p-12 text-center text-slate-400 space-y-3 font-semibold">
+        <svg class="w-12 h-12 mx-auto text-slate-300 dark:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+        <p>No class attendance records have been registered for your account yet.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% if subject_stats %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const labels = [{% for item in subject_stats %}"{{ item.subject }}",{% endfor %}];
+        const data = [{% for item in subject_stats %}{{ item.percentage }},{% endfor %}];
+
+        const isDark = document.documentElement.classList.contains('dark');
+        const gridColor = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
+        const textColor = isDark ? '#cbd5e1' : '#475569';
+
+        const ctx = document.getElementById('studentAttendanceChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: data,
+                    backgroundColor: 'rgba(14, 165, 233, 0.75)',
+                    borderColor: 'rgb(14, 165, 233)',
+                    borderWidth: 1,
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        grid: { color: gridColor },
+                        ticks: { color: textColor, font: { family: 'Plus Jakarta Sans', weight: 'bold' } }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: textColor, font: { family: 'Plus Jakarta Sans', weight: 'bold' } }
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endif %}
+{% endblock %}

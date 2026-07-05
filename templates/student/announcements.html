@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %}Notice Board | MeasiConnect{% endblock %}
+{% block section_title %}Notice Board{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6">
+    <div class="hero-banner p-6 md:p-8">
+        <div class="relative z-10">
+            <span class="badge badge-gold mb-3">Official Notices</span>
+            <h1 class="font-display text-2xl font-bold text-white">College Announcements</h1>
+            <p class="text-white/70 text-sm mt-2">Stay updated with the latest notices from faculty and administration.</p>
+        </div>
+    </div>
+
+    <div class="space-y-4">
+        {% for a in announcements %}
+        <div class="portal-card p-5">
+            <div class="flex justify-between items-start gap-4">
+                <div class="flex-1">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="badge badge-navy">{{ a.created_by_role|default('staff') }}</span>
+                        {% if a.target_dept and a.target_dept != 'all' %}
+                        <span class="badge badge-gold">{{ a.target_dept }}</span>
+                        {% endif %}
+                    </div>
+                    <h3 class="font-bold text-navy text-base">{{ a.title }}</h3>
+                    <p class="text-sm text-slate-600 mt-2 leading-relaxed whitespace-pre-line">{{ a.content }}</p>
+                    <div class="flex items-center gap-3 mt-4 text-xs text-slate-400">
+                        <span>Posted by <strong class="text-slate-600">{{ a.created_by_name }}</strong></span>
+                        <span>&bull;</span>
+                        <span>{{ a.created_at.strftime('%d %b %Y, %I:%M %p') if a.created_at else 'N/A' }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="portal-card p-12 text-center">
+            <svg class="w-12 h-12 text-slate-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+            <p class="text-slate-500 font-medium">No announcements at this time.</p>
+            <p class="text-xs text-slate-400 mt-1">Check back later for updates from your faculty.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block title %}Faculty Directory | MeasiConnect{% endblock %}
+{% block section_title %}Faculty Directory{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto space-y-6">
+    <div class="portal-card p-5">
+        <form method="GET" class="flex gap-3">
+            <input type="text" name="search" value="{{ search }}" placeholder="Search by name, email, or department..." class="form-input flex-1">
+            <button type="submit" class="btn-primary shrink-0">Search</button>
+        </form>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {% for f in faculty %}
+        <div class="portal-card p-5 hover-card">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-12 h-12 rounded-full bg-navy text-white text-lg font-bold flex items-center justify-center capitalize shrink-0">
+                    {{ f.name[0] }}
+                </div>
+                <div class="min-w-0">
+                    <h3 class="font-bold text-navy truncate">{{ f.name }}</h3>
+                    <span class="badge badge-navy mt-1">{{ f.department|default('Faculty') }}</span>
+                </div>
+            </div>
+            <div class="space-y-2 text-sm">
+                <div class="flex items-center gap-2 text-slate-600">
+                    <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                    <span class="truncate">{{ f.email }}</span>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-span-full portal-card p-12 text-center text-slate-400">
+            No faculty members found{% if search %} matching "{{ search }}"{% endif %}.
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

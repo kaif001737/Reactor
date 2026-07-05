@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% block title %}Course Syllabus | MeasiConnect{% endblock %}
+{% block section_title %}Syllabus Center{% endblock %}
+
+{% block content %}
+<div class="space-y-6 max-w-5xl mx-auto">
+    <!-- Intro Card -->
+    <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200/60 dark:border-slate-700/50 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h1 class="text-xl font-black text-slate-800 dark:text-white">Academic Curriculum Syllabus</h1>
+            <p class="text-slate-500 dark:text-slate-400 text-xs mt-1">Download and review the course regulation syllabus documents for <strong class="text-slate-700 dark:text-slate-200 font-bold">{{ current_user.department }} Semester {{ current_user.semester }}</strong>.</p>
+        </div>
+        <svg class="w-10 h-10 text-primary-500 hidden sm:block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+    </div>
+
+    <!-- Syllabus List Table -->
+    <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/60 dark:border-slate-700/50 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs border-collapse">
+                <thead>
+                    <tr class="bg-slate-50 dark:bg-slate-900/40 border-b border-slate-200/60 dark:border-slate-700/60 text-slate-400 font-black uppercase tracking-wider">
+                        <th class="px-6 py-4">Subject</th>
+                        <th class="px-6 py-4">Syllabus Title</th>
+                        <th class="px-6 py-4">Description</th>
+                        <th class="px-6 py-4">Date Added</th>
+                        <th class="px-6 py-4 text-right">Download</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50 font-medium">
+                    {% for f in files %}
+                    <tr class="text-slate-600 dark:text-slate-300 hover:bg-slate-50/50 dark:hover:bg-slate-750/10 transition-colors">
+                        <td class="px-6 py-5 font-bold text-primary-600 dark:text-primary-400">{{ f.subject or '—' }}</td>
+                        <td class="px-6 py-5 font-bold text-slate-800 dark:text-slate-100">
+                            <span class="block truncate max-w-[200px]" title="{{ f.title }}">{{ f.title }}</span>
+                            <span class="text-[9px] text-slate-400 font-mono mt-0.5 block truncate max-w-[150px]">{{ f.original_name }}</span>
+                        </td>
+                        <td class="px-6 py-5 text-slate-500 dark:text-slate-400">
+                            {{ f.description or 'No description provided.' }}
+                        </td>
+                        <td class="px-6 py-5 text-slate-400">
+                            {{ f.uploaded_at.strftime('%Y-%m-%d') if f.uploaded_at else 'N/A' }}
+                        </td>
+                        <td class="px-6 py-5 text-right">
+                            <a href="{{ url_for('static', filename='uploads/files/' ~ f.filename) }}" download="{{ f.original_name }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary-50 hover:bg-primary-100 dark:bg-primary-950/20 dark:hover:bg-primary-900/30 text-primary-600 dark:text-primary-400 rounded-lg font-bold transition-colors">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                Download
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="px-6 py-12 text-center text-slate-400 font-semibold">
+                            No syllabus curriculum documents have been uploaded for your department and semester yet.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

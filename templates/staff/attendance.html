@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+{% block title %}Mark Attendance | MeasiConnect{% endblock %}
+{% block section_title %}Mark Attendance{% endblock %}
+
+{% block content %}
+<div class="space-y-6 max-w-5xl mx-auto">
+    <!-- Header -->
+    <div>
+        <h1 class="text-xl font-black text-slate-800 dark:text-white">Daily Hour-by-Hour Attendance</h1>
+        <p class="text-slate-500 dark:text-slate-400 text-xs mt-1">Select class parameters to load the specific cohort register list and mark their presence status.</p>
+    </div>
+
+    <!-- Filter Form -->
+    <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200/60 dark:border-slate-700/50 shadow-sm">
+        <form method="GET" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 items-end">
+            <div>
+                <label class="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1.5">Department</label>
+                <select name="department" required class="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary-500 text-slate-700 dark:text-slate-200">
+                    {% for d in departments %}
+                    <option value="{{ d }}" {% if dept_filter == d %}selected{% endif %}>{{ d }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1.5">Semester</label>
+                <select name="semester" required class="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary-500 text-slate-700 dark:text-slate-200">
+                    {% for s in range(1, 7) %}
+                    <option value="{{ s }}" {% if sem_filter == s %}selected{% endif %}>Semester {{ s }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1.5">Class Hour</label>
+                <select name="hour" required class="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary-500 text-slate-700 dark:text-slate-200">
+                    {% for h in range(1, 6) %}
+                    <option value="{{ h }}" {% if hour_filter == h %}selected{% endif %}>Hour {{ h }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1.5">Subject / Period</label>
+                <input type="text" name="subject" value="{{ subject_filter }}" required placeholder="e.g. DBMS, Python"
+                       class="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary-500 text-slate-700 dark:text-slate-200">
+            </div>
+            <div>
+                <label class="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1.5">Date</label>
+                <input type="date" name="date" value="{{ date_filter }}" required
+                       class="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary-500 text-slate-700 dark:text-slate-200">
+            </div>
+            <div class="sm:col-span-2 md:col-span-5 text-right mt-2">
+                <button type="submit" class="px-5 py-2 bg-slate-200 hover:bg-slate-300 dark:bg-slate-750 dark:hover:bg-slate-700 text-slate-800 dark:text-white text-xs font-bold rounded-xl transition-colors">
+                    Load Cohort Register
+                </button>
+            </div>
+        </form>
+        {% if marked_already %}
+        <div class="flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 rounded-xl p-3.5 mt-4 text-xs font-bold leading-snug">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            Attendance already marked for Hour {{ hour_filter }} ({{ subject_filter }}). Saving again will update current records.
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Student Register list and Mark panel -->
+    {% if students %}
+    <form method="POST" class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/60 dark:border-slate-700/50 shadow-sm overflow-hidden">
+        <input type="hidden" name="subject" value="{{ subject_filter }}">
+        <input type="hidden" name="date" value="{{ date_filter }}">
+        <input type="hidden" name="department" value="{{ dept_filter }}">
+        <input type="hidden" name="semester" value="{{ sem_filter }}">
+        <input type="hidden" name="hour" value="{{ hour_filter }}">
+
+        <!-- Quick Actions Bulk Fill Toolbar -->
+        <div class="px-6 py-3.5 bg-slate-50 dark:bg-slate-900/35 border-b border-slate-200/60 dark:border-slate-700/60 flex flex-wrap gap-2.5 items-center justify-between">
+            <span class="text-xs font-bold text-slate-500 dark:text-slate-400">Class Cohort: <strong class="text-slate-800 dark:text-slate-200">{{ students|length }} students</strong></span>
+            
+            <div class="flex gap-2">
+                <button type="button" onclick="markAllAttendance('present')" class="px-2.5 py-1 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-lg text-[10px] font-black uppercase tracking-wider transition-colors">
+                    All Present
+                </button>
+                <button type="button" onclick="markAllAttendance('absent')" class="px-2.5 py-1 bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 rounded-lg text-[10px] font-black uppercase tracking-wider transition-colors">
+                    All Absent
+                </button>
+            </div>
+        </div>
+
+        <table class="w-full text-left text-xs border-collapse">
+            <thead>
+                <tr class="bg-slate-50/50 dark:bg-slate-900/20 border-b border-slate-200/60 dark:border-slate-700/60 text-slate-450 font-black uppercase tracking-wider">
+                    <th class="px-6 py-4">Register Number</th>
+                    <th class="px-6 py-4">Student Name</th>
+                    <th class="px-6 py-4 text-center">Attendance Status</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50 font-medium">
+                {% for s in students %}
+                <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-700/10 transition-colors">
+                    <td class="px-6 py-4 font-mono font-bold text-slate-800 dark:text-slate-200">{{ s.roll_no }}</td>
+                    <td class="px-6 py-4 font-semibold text-slate-700 dark:text-slate-100">{{ s.name }}</td>
+                    <td class="px-6 py-4">
+                        <div class="flex justify-center gap-6">
+                            {% for st, label, color in [
+                                ('present','P','text-emerald-500 accent-emerald-500'),
+                                ('absent','A','text-rose-500 accent-rose-500'),
+                                ('late','L','text-amber-500 accent-amber-500')
+                            ] %}
+                            <label class="flex items-center gap-2 cursor-pointer select-none">
+                                <input type="radio" name="status_{{ s._id }}" value="{{ st }}"
+                                    {% if s.marked_status == st or (not s.marked_status and st == 'present') %}checked{% endif %}
+                                    class="w-4 h-4 {{ color }} focus:ring-0">
+                                <span class="text-xs font-bold hover:text-slate-800 dark:hover:text-slate-200">{{ label }}</span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        <div class="p-5 border-t border-slate-200/60 dark:border-slate-700/60 text-right bg-slate-50/50 dark:bg-slate-900/10">
+            <button type="submit" class="px-6 py-3 bg-primary-600 hover:bg-primary-500 text-white font-bold rounded-xl text-xs shadow-md shadow-primary-500/10 transition-all">
+                Submit Attendance Logs
+            </button>
+        </div>
+    </form>
+    {% else %}
+    <div class="bg-white dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700/50 rounded-2xl p-12 text-center text-slate-400 font-semibold space-y-2">
+        <svg class="w-12 h-12 mx-auto text-slate-300 dark:text-slate-650" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+        <p>No students loaded. Set the filters and click "Load Cohort Register".</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

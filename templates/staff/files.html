@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+{% block title %}Upload Resources | MeasiConnect{% endblock %}
+{% block section_title %}Upload Resources{% endblock %}
+
+{% block content %}
+<div class="space-y-6 max-w-5xl mx-auto">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- Left: Upload Form -->
+        <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/60 dark:border-slate-700/50 shadow-sm p-6 space-y-4 h-fit">
+            <h3 class="font-black text-slate-850 dark:text-white text-md border-b border-slate-100 dark:border-slate-700/60 pb-3">Share Study Resource</h3>
+            
+            <form method="POST" enctype="multipart/form-data" class="space-y-4">
+                <div>
+                    <label class="block text-[10px] font-black uppercase tracking-wider text-slate-455 mb-1">Document Title</label>
+                    <input type="text" name="title" required placeholder="e.g. Unit 1 DBMS Lecture Notes"
+                           class="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary-500 text-slate-800 dark:text-slate-100">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-black uppercase tracking-wider text-slate-455 mb-1">Description / Topic details</label>
+                    <textarea name="description" placeholder="Provide description..." rows="3"
+                              class="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary-500 text-slate-800 dark:text-slate-100"></textarea>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-black uppercase tracking-wider text-slate-455 mb-1">Resource Category</label>
+                    <select name="file_type" required class="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary-500 text-slate-800 dark:text-slate-100">
+                        <option value="study_material">Study Material</option>
+                        <option value="assignment">Assignment</option>
+                    </select>
+                    <p class="text-[10px] text-slate-400 mt-1">Syllabus is managed by Admin under Syllabus Manager.</p>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[10px] font-black uppercase tracking-wider text-slate-455 mb-1">Department</label>
+                        <select name="department" required class="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary-500 text-slate-800 dark:text-slate-100">
+                            {% for d in departments %}
+                            <option value="{{ d }}">{{ d }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black uppercase tracking-wider text-slate-455 mb-1">Semester</label>
+                        <select name="semester" required class="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary-500 text-slate-800 dark:text-slate-100">
+                            {% for s in range(1, 7) %}
+                            <option value="{{ s }}">Sem {{ s }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-black uppercase tracking-wider text-slate-455 mb-1">Select File</label>
+                    <input type="file" name="file" required
+                           class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-primary-50 file:text-primary-700 dark:file:bg-primary-950/20 dark:file:text-primary-400 hover:file:bg-primary-100">
+                </div>
+                <button type="submit" class="w-full py-3 bg-primary-600 hover:bg-primary-500 text-white text-xs font-bold rounded-xl shadow-md transition-all">
+                    Upload & Publish File
+                </button>
+            </form>
+        </div>
+
+        <!-- Right: Uploaded Files List -->
+        <div class="lg:col-span-2 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/60 dark:border-slate-700/50 shadow-sm p-6 space-y-4">
+            <h3 class="font-black text-slate-850 dark:text-white text-md border-b border-slate-100 dark:border-slate-700/60 pb-3">My Uploaded Resources</h3>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50 dark:bg-slate-900/20 border-b border-slate-200/60 dark:border-slate-700/60 text-slate-400 font-black uppercase tracking-wider">
+                            <th class="px-4 py-3">Resource Info</th>
+                            <th class="px-4 py-3">Target</th>
+                            <th class="px-4 py-3">Type</th>
+                            <th class="px-4 py-3 text-right">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50 font-medium">
+                        {% for f in files %}
+                        <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-700/10 transition-colors">
+                            <td class="px-4 py-4">
+                                <p class="font-bold text-slate-800 dark:text-slate-100 truncate max-w-[180px]">{{ f.title }}</p>
+                                <span class="text-[9px] text-slate-405 font-mono truncate max-w-[150px] block mt-0.5">{{ f.original_name }}</span>
+                            </td>
+                            <td class="px-4 py-4 text-slate-600 dark:text-slate-350">
+                                {{ f.department }} Sem {{ f.semester }}
+                            </td>
+                            <td class="px-4 py-4">
+                                <span class="inline-block px-2.5 py-1 text-[9px] font-black rounded-lg uppercase tracking-wider
+                                    {% if f.file_type == 'assignment' %}bg-amber-100 text-amber-800 dark:bg-amber-950/20 dark:text-amber-400
+                                    {% elif f.file_type == 'syllabus' %}bg-purple-100 text-purple-800 dark:bg-purple-950/20 dark:text-purple-400
+                                    {% else %}bg-primary-100 text-primary-800 dark:bg-primary-950/20 dark:text-primary-400{% endif %}">
+                                    {{ f.file_type.replace('_', ' ') }}
+                                </span>
+                            </td>
+                            <td class="px-4 py-4 text-right">
+                                <form method="POST" action="{{ url_for('staff.delete_file', file_id=f._id) }}" onsubmit="return confirm('Delete this file?')" class="inline">
+                                    <button type="submit" class="text-[10px] font-black text-rose-500 hover:text-rose-600 hover:underline">
+                                        Delete
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="4" class="px-4 py-8 text-center text-slate-400 font-semibold">
+                                You haven't shared any study resources yet. Use the upload panel to share files.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block title %}Events & Calendar | MeasiConnect{% endblock %}
+{% block section_title %}Events & Calendar{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6">
+    <div class="hero-banner p-6">
+        <div class="relative z-10">
+            <h1 class="font-display text-xl font-bold text-white">Academic Calendar</h1>
+            <p class="text-white/70 text-sm mt-1">Upcoming exams, lectures, and college events.</p>
+        </div>
+    </div>
+
+    <div>
+        <h3 class="font-bold text-navy mb-4 flex items-center gap-2">
+            <span class="event-dot"></span> Upcoming Events
+        </h3>
+        <div class="space-y-3">
+            {% for e in upcoming %}
+            <div class="portal-card p-5 flex gap-4">
+                <div class="shrink-0 w-14 text-center">
+                    <p class="text-2xl font-bold text-navy">{{ e.event_date.strftime('%d') }}</p>
+                    <p class="text-[10px] font-semibold text-slate-400 uppercase">{{ e.event_date.strftime('%b %Y') }}</p>
+                </div>
+                <div class="flex-1 border-l border-slate-100 pl-4">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="badge {% if e.event_type == 'exam' %}badge-danger{% elif e.event_type == 'lecture' %}badge-navy{% else %}badge-gold{% endif %} capitalize">{{ e.event_type }}</span>
+                        {% if e.location %}<span class="text-[10px] text-slate-400">{{ e.location }}</span>{% endif %}
+                    </div>
+                    <h4 class="font-bold text-navy">{{ e.title }}</h4>
+                    <p class="text-sm text-slate-600 mt-1">{{ e.description }}</p>
+                </div>
+            </div>
+            {% else %}
+            <div class="portal-card p-8 text-center text-slate-400">No upcoming events scheduled.</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    {% if past %}
+    <div>
+        <h3 class="font-bold text-slate-500 mb-4 text-sm uppercase tracking-wider">Past Events</h3>
+        <div class="space-y-2">
+            {% for e in past %}
+            <div class="portal-card p-4 opacity-70 flex items-center gap-4">
+                <span class="text-xs text-slate-400 w-20 shrink-0">{{ e.event_date.strftime('%d %b %Y') }}</span>
+                <span class="font-medium text-sm text-slate-600">{{ e.title }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

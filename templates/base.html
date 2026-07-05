@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}MeasiConnect{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        navy: { DEFAULT: '#1e3a5f', light: '#2d5282', dark: '#0f2744' },
+                        gold: { DEFAULT: '#c9a227', light: '#f5e6b8' }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    {% block head %}{% endblock %}
+</head>
+<body class="min-h-screen flex flex-col md:flex-row bg-[#faf8f5]">
+
+    <!-- Mobile Header -->
+    <header class="md:hidden flex items-center justify-between px-4 py-3 bg-white border-b border-slate-200 shrink-0 sticky top-0 z-30">
+        <div class="flex items-center gap-3">
+            <button id="sidebar-toggle" class="p-2 text-slate-500 hover:text-navy focus:outline-none">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+            </button>
+            <span class="font-display font-bold text-lg text-navy">MeasiConnect</span>
+        </div>
+        <div class="flex items-center gap-2">
+            <button id="notification-btn-mobile" class="p-2 text-slate-500 relative">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                <span id="notification-badge-mobile" class="hidden absolute top-0.5 right-0.5 w-4 h-4 bg-red-500 text-[9px] font-bold text-white flex items-center justify-center rounded-full">0</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar fixed inset-y-0 left-0 w-[260px] flex flex-col z-40 transform -translate-x-full md:translate-x-0 transition-transform duration-300 md:static md:h-screen shrink-0">
+        <!-- Brand -->
+        <div class="sidebar-brand px-5 py-5">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-lg bg-white/10 border border-gold/30 flex items-center justify-center shrink-0">
+                        <svg class="w-5 h-5 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 14l9-5-9-5-9 5 9 5z"/></svg>
+                    </div>
+                    <div>
+                        <h1 class="text-base font-bold text-white leading-tight">MeasiConnect</h1>
+                        <p class="text-[9px] text-gold/70 uppercase tracking-widest font-semibold">MEASI IIT Portal</p>
+                    </div>
+                </div>
+                <button id="sidebar-close" class="md:hidden p-1 text-white/60 hover:text-white">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+        </div>
+
+        {% if current_user.is_authenticated %}
+        <!-- User card -->
+        <div class="px-4 py-3 border-b border-slate-100">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-full bg-navy flex items-center justify-center text-white text-sm font-bold capitalize shrink-0">
+                    {{ current_user.name[0] }}
+                </div>
+                <div class="min-w-0 flex-1">
+                    <p class="text-sm font-semibold text-navy truncate">{{ current_user.name }}</p>
+                    <span class="badge badge-navy mt-0.5">{{ current_user.role }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="flex-1 py-3 px-3 overflow-y-auto">
+            {% if current_user.role == 'student' %}
+            <p class="nav-section-label">Main</p>
+            <a href="{{ url_for('student.dashboard') }}" class="nav-link {% if request.endpoint == 'student.dashboard' %}active{% endif %}">
+                <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                Dashboard
+            </a>
+            <a href="{{ url_for('student.attendance') }}" class="nav-link {% if request.endpoint == 'student.attendance' %}active{% endif %}">
+                <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                Attendance
+            </a>
+            <a href="{{ url_for('student.timetable') }}" class="nav-link {% if request.endpoint == 'student.timetable' %}active{% endif %}">
+                <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                Timetable
+            </a>
+
+            <p class="nav-section-label">Academics</p>
+            <a href="{{ url_for('student.files') }}" class="nav-link {% if request.endpoint == 'student.files' %}active{% endif %}">
+                <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                Study Materials
+            </a>
+            <a href="{{ url_for('student.syllabus') }}" class="nav-link {% if request.endpoint == 'student.syllabus' %}active{% endif %}">
+                <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                Syllabus
+            </a>
+            <a href="{{ url_for('student.announcements') }}" class="nav-link {% if request.endpoint == 'student.announcements' %}active{% endif %}">
+                <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                Notice Board
+            </a>
+            <a href="{{ url_for('student.events') }}" class="nav-link {% if request.endpoint == 'student.events' %}active{% endif %}">
+                <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                Events & Calendar
+            </a>
+
+            <p class="nav-section-label">Services</p>
+            <a href="{{ url_for('student.leave') }}" class="nav-link {% if request.endpoint == 'student.leave' %}active{% endif %}">
+                <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                Leave Application
+            </a>
+            <a href="{{ url_for('student.directory') }}" class="nav-link {% if request.endpoint == 'student.directory' %}active{% endif %}">
+                <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                Faculty Directory
+            </a>
+            <a href="{{ url_for('student.profile') }}" class="nav-link {% if request.endpoint == 'student.profile' %}active{% endif %}">
+                <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                My Profile
+            </a>
+
+            {% elif current_user.role == 'staff' %}
+            <p class="nav-section-label">Main</p>
+            <a href="{{ url_for('staff.dashboard') }}" class="nav-link {% if request.endpoint == 'staff.dashboard' %}active{% endif %}">
+                <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                Dashboard
+            </a>
+            <a href="{{ url_for('staff.attendance') }}" class="nav-link {% if request.endpoint == 'staff.attendance' %}active{% endif %}">
+                <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                Mark Attendance
+            </a>
+            <a href="{{ url_for('staff.timetable_view') }}" class="nav-link {% if request.endpoint == 'staff.timetable_view' %}active{% endif %}">
+                <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                My Schedule
+            </a>
+
+            <p class="nav-section-label">Teaching</p>
+            <a href="{{ url_for('staff.students') }}" class="nav-link {% if request.endpoint == 'staff.students' %}active{% endif %}">
+                <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                Student Directory
+            </a>
+            <a href="{{ url_for('staff.files_mgmt') }}" class="nav-link {% if request.endpoint == 'staff.files_mgmt' %}active{% endif %}">
+                <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                Upload Materials
+            </a>
+            <a href="{{ url_for('staff.syllabus') }}" class="nav-link {% if request.endpoint == 'staff.syllabus' %}active{% endif %}">
+                <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                Syllabus
+            </a>
+            <a href="{{ url_for('staff.announcements_mgmt') }}" class="nav-link {% if request.endpoint == 'staff.announcements_mgmt' %}active{% endif %}">
+                <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                Notice Board
+            </a>
+
+            <p class="nav-section-label">Services</p>
+            <a href="{{ url_for('staff.leave_mgmt') }}" class="nav-link {% if request.endpoint == 'staff.leave_mgmt' %}active{% endif %}">
+                <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                Leave Requests
+                {% if pending_leave_count is defined and pending_leave_count > 0 %}
+                <span class="ml-auto badge badge-warning">{{ pending_leave_count }}</span>
+                {% endif %}
+            </a>
+            <a href="{{ url_for('staff.events') }}" class="nav-link {% if request.endpoint == 'staff.events' %}active{% endif %}">
+                <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                Events & Calendar
+            </a>
+
+            {% elif current_user.role == 'admin' %}
+            <p class="nav-section-label">Overview</p>
+            <a href="{{ url_for('admin.dashboard') }}" class="nav-link {% if request.endpoint == 'admin.dashboard' %}active{% endif %}">
+                <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                Dashboard
+            </a>
+            <a href="{{ url_for('admin.attendance_overview') }}" class="nav-link {% if request.endpoint == 'admin.attendance_overview' %}active{% endif %}">
+                <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                Attendance Logs
+            </a>
+            <a href="{{ url_for('admin.users_mgmt') }}" class="nav-link {% if request.endpoint == 'admin.users_mgmt' %}active{% endif %}">
+                <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                User Management
+            </a>
+
+            <p class="nav-section-label">Academics</p>
+            <a href="{{ url_for('admin.timetable_mgmt') }}" class="nav-link {% if request.endpoint == 'admin.timetable_mgmt' %}active{% endif %}">
+                <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                Timetable Setup
+            </a>
+            <a href="{{ url_for('admin.syllabus_mgmt') }}" class="nav-link {% if request.endpoint == 'admin.syllabus_mgmt' %}active{% endif %}">
+                <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                Syllabus Manager
+            </a>
+            <a href="{{ url_for('admin.files_mgmt') }}" class="nav-link {% if request.endpoint == 'admin.files_mgmt' %}active{% endif %}">
+                <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                Shared Files
+            </a>
+            <a href="{{ url_for('admin.announcements_mgmt') }}" class="nav-link {% if request.endpoint == 'admin.announcements_mgmt' %}active{% endif %}">
+                <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                Notice Board
+            </a>
+            <a href="{{ url_for('admin.events_mgmt') }}" class="nav-link {% if request.endpoint == 'admin.events_mgmt' %}active{% endif %}">
+                <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                Events & Calendar
+            </a>
+            {% endif %}
+        </nav>
+
+        <!-- Footer -->
+        <div class="p-4 border-t border-slate-100 flex justify-between items-center">
+            <span class="text-[10px] text-slate-400 font-medium">&copy; MEASI IIT</span>
+            <a href="{{ url_for('auth.logout') }}" class="flex items-center gap-1 text-xs text-red-500 hover:text-red-600 font-semibold">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                Logout
+            </a>
+        </div>
+        {% endif %}
+    </aside>
+
+    <div id="sidebar-overlay" class="hidden md:hidden fixed inset-0 bg-navy/40 z-35 backdrop-blur-sm"></div>
+
+    <!-- Main -->
+    <main class="flex-1 flex flex-col min-w-0 overflow-y-auto">
+        <div class="header-accent hidden md:block"></div>
+        <header class="portal-header hidden md:flex items-center justify-between px-8 py-3.5 shrink-0 z-20">
+            <div>
+                <h2 class="text-base font-bold text-navy">{% block section_title %}Portal Overview{% endblock %}</h2>
+                <p class="text-[11px] text-slate-400 mt-0.5">MEASI Institute of Information Technology</p>
+            </div>
+            <div class="flex items-center gap-4">
+                {% if current_user.is_authenticated %}
+                <div class="relative">
+                    <button id="notification-btn" class="p-2 text-slate-400 hover:text-navy relative rounded-lg hover:bg-slate-50">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                        <span id="notification-badge" class="hidden absolute top-1 right-1 w-4 h-4 bg-red-500 text-[9px] font-bold text-white flex items-center justify-center rounded-full animate-custom-pulse">0</span>
+                    </button>
+                    <div id="notification-dropdown" class="hidden absolute right-0 mt-2 w-80 bg-white border border-slate-200 rounded-xl shadow-xl overflow-hidden z-50">
+                        <div class="px-4 py-3 bg-slate-50 flex justify-between items-center border-b border-slate-200">
+                            <span class="text-xs font-bold text-navy">Notifications</span>
+                            <button id="notification-mark-read" class="text-[10px] font-semibold text-navy hover:underline">Mark all read</button>
+                        </div>
+                        <div id="notification-list" class="max-h-72 overflow-y-auto"></div>
+                    </div>
+                </div>
+                <div class="relative">
+                    <button onclick="toggleProfileDropdown()" class="flex items-center gap-2 p-1.5 rounded-lg hover:bg-slate-50 transition-colors">
+                        <div class="w-8 h-8 rounded-full bg-navy flex items-center justify-center text-white text-xs font-bold capitalize">{{ current_user.name[0] }}</div>
+                        <span class="text-xs font-semibold text-slate-600">{{ current_user.name.split(' ')[0] }}</span>
+                        <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div id="profile-dropdown" class="hidden absolute right-0 mt-2 w-52 bg-white border border-slate-200 rounded-xl shadow-xl z-50 py-1">
+                        <div class="px-4 py-2.5 border-b border-slate-100">
+                            <p class="font-semibold text-sm text-navy truncate">{{ current_user.name }}</p>
+                            <p class="text-[11px] text-slate-400 truncate">{% if current_user.role == 'student' %}{{ current_user.roll_no }}{% else %}{{ current_user.email }}{% endif %}</p>
+                        </div>
+                        {% if current_user.role == 'student' %}
+                        <a href="{{ url_for('student.profile') }}" class="flex items-center gap-2 px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50">My Profile</a>
+                        {% endif %}
+                        <a href="{{ url_for('auth.logout') }}" class="flex items-center gap-2 px-4 py-2 text-xs font-semibold text-red-500 hover:bg-red-50">Logout</a>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </header>
+
+        <!-- Flash messages -->
+        <div class="fixed top-4 right-4 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none px-4 md:px-0">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% for category, msg in messages %}
+                <div class="flash-alert pointer-events-auto p-4 rounded-xl shadow-lg text-sm font-medium flex items-start gap-3 border
+                    {% if category == 'success' %}bg-emerald-50 text-emerald-800 border-emerald-200
+                    {% elif category == 'error' %}bg-rose-50 text-rose-800 border-rose-200
+                    {% else %}bg-amber-50 text-amber-800 border-amber-200{% endif %}">
+                    <span class="flex-1">{{ msg }}</span>
+                </div>
+                {% endfor %}
+            {% endwith %}
+        </div>
+
+        <div class="flex-1 p-4 md:p-8 lg:p-10 animate-fade-in">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

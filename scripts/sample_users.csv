@@ -1,0 +1,5 @@
+role,name,email,roll_no,department,semester,password
+admin,System Administrator,admin@measiit.edu.in,,Admin,,AdminPass123
+staff,Dr. Sarah Rahman,sarah@measiit.edu.in,,MCA,,StaffPass123
+student,Sarah Kaif,,26MCA01,MCA,1,StudentPass123
+student,Mohammed Kaif,,26MCA02,MCA,1,StudentPass123

@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% block title %}Events Management | MeasiConnect{% endblock %}
+{% block section_title %}Events & Calendar{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto space-y-6">
+    <div class="portal-card p-6">
+        <h3 class="font-bold text-navy mb-4">Create New Event</h3>
+        <form method="POST" class="space-y-4">
+            <input type="hidden" name="action" value="create">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="sm:col-span-2">
+                    <label class="form-label">Event Title</label>
+                    <input type="text" name="title" required class="form-input" placeholder="e.g. Mid-Semester Examinations">
+                </div>
+                <div>
+                    <label class="form-label">Date</label>
+                    <input type="date" name="event_date" required class="form-input">
+                </div>
+                <div>
+                    <label class="form-label">Type</label>
+                    <select name="event_type" class="form-input">
+                        <option value="event">General Event</option>
+                        <option value="exam">Examination</option>
+                        <option value="lecture">Guest Lecture</option>
+                        <option value="holiday">Holiday</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="form-label">Location</label>
+                    <input type="text" name="location" class="form-input" placeholder="e.g. Seminar Hall A">
+                </div>
+                <div class="sm:col-span-2">
+                    <label class="form-label">Description</label>
+                    <textarea name="description" rows="2" class="form-input" placeholder="Event details..."></textarea>
+                </div>
+            </div>
+            <button type="submit" class="btn-primary">Publish Event</button>
+        </form>
+    </div>
+
+    <div class="portal-card overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-100">
+            <h3 class="font-bold text-navy">All Events</h3>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="portal-table">
+                <thead>
+                    <tr><th>Date</th><th>Title</th><th>Type</th><th>Location</th><th></th></tr>
+                </thead>
+                <tbody>
+                    {% for e in events %}
+                    <tr>
+                        <td class="font-medium">{{ e.event_date.strftime('%d %b %Y') }}</td>
+                        <td>{{ e.title }}</td>
+                        <td><span class="badge badge-navy capitalize">{{ e.event_type }}</span></td>
+                        <td class="text-slate-500">{{ e.location|default('-') }}</td>
+                        <td>
+                            <form method="POST" class="inline" onsubmit="return confirm('Delete this event?')">
+                                <input type="hidden" name="action" value="delete">
+                                <input type="hidden" name="event_id" value="{{ e._id }}">
+                                <button type="submit" class="text-xs text-red-500 font-semibold hover:underline">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="5" class="text-center py-8 text-slate-400">No events yet.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

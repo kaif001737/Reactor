@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% block title %}Staff Dashboard | MeasiConnect{% endblock %}
+{% block section_title %}Faculty Dashboard{% endblock %}
+
+{% block content %}
+<div class="space-y-6 max-w-5xl mx-auto">
+
+    <div class="hero-banner p-6 md:p-8">
+        <div class="relative z-10">
+            <p class="text-gold text-xs font-semibold uppercase tracking-wider mb-1">Faculty Portal</p>
+            <h1 class="font-display text-2xl font-bold text-white">Welcome, {{ current_user.name }}</h1>
+            <p class="text-white/60 text-sm mt-2">{{ current_user.email }} &bull; {{ department }} Department</p>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+        <div class="stat-card stat-primary p-5">
+            <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Students</p>
+            <p class="text-3xl font-extrabold mt-2 text-navy">{{ student_count }}</p>
+        </div>
+        <div class="stat-card stat-warning p-5">
+            <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Marked Today</p>
+            <p class="text-3xl font-extrabold mt-2 text-navy">{{ marked_today }}</p>
+        </div>
+        <div class="stat-card stat-success p-5">
+            <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Files Uploaded</p>
+            <p class="text-3xl font-extrabold mt-2 text-emerald-600">{{ files_count }}</p>
+        </div>
+        <div class="stat-card stat-danger p-5">
+            <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Pending Leaves</p>
+            <p class="text-3xl font-extrabold mt-2 text-amber-600">{{ pending_leave_count|default(0) }}</p>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="portal-card p-6">
+        <h3 class="font-bold text-navy mb-4">Quick Actions</h3>
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+            <a href="{{ url_for('staff.attendance') }}" class="action-tile">
+                <div class="action-tile-icon bg-navy/10 text-navy"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg></div>
+                <span class="text-xs font-semibold text-navy">Attendance</span>
+            </a>
+            <a href="{{ url_for('staff.students') }}" class="action-tile">
+                <div class="action-tile-icon bg-blue-50 text-blue-700"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg></div>
+                <span class="text-xs font-semibold text-navy">Students</span>
+            </a>
+            <a href="{{ url_for('staff.files_mgmt') }}" class="action-tile">
+                <div class="action-tile-icon bg-emerald-50 text-emerald-700"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg></div>
+                <span class="text-xs font-semibold text-navy">Upload</span>
+            </a>
+            <a href="{{ url_for('staff.announcements_mgmt') }}" class="action-tile">
+                <div class="action-tile-icon bg-amber-50 text-amber-700"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg></div>
+                <span class="text-xs font-semibold text-navy">Notices</span>
+            </a>
+            <a href="{{ url_for('staff.leave_mgmt') }}" class="action-tile">
+                <div class="action-tile-icon bg-rose-50 text-rose-700"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></div>
+                <span class="text-xs font-semibold text-navy">Leave</span>
+            </a>
+            <a href="{{ url_for('staff.timetable_view') }}" class="action-tile">
+                <div class="action-tile-icon bg-purple-50 text-purple-700"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg></div>
+                <span class="text-xs font-semibold text-navy">Schedule</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Announcements -->
+    <div class="portal-card p-6">
+        <div class="flex justify-between items-center border-b border-slate-100 pb-3 mb-4">
+            <h3 class="font-bold text-navy">Staff Announcements</h3>
+        </div>
+        <div class="space-y-3">
+            {% for a in announcements %}
+            <div class="p-4 bg-slate-50 rounded-lg border border-slate-100">
+                <div class="flex justify-between gap-2">
+                    <h4 class="font-semibold text-sm text-navy">{{ a.title }}</h4>
+                    <span class="text-[10px] text-slate-400 shrink-0">{{ a.created_at.strftime('%d %b %Y') if a.created_at else '' }}</span>
+                </div>
+                <p class="text-xs text-slate-500 mt-1">{{ a.content }}</p>
+                <p class="text-[10px] text-slate-400 mt-2">By {{ a.created_by_name }} ({{ a.created_by_role }})</p>
+            </div>
+            {% else %}
+            <p class="py-6 text-center text-sm text-slate-400">No announcements posted.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

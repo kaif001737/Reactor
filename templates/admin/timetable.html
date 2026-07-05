@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% block title %}Manage Timetable Setup | MeasiConnect{% endblock %}
+{% block section_title %}Timetable Matrix Configuration{% endblock %}
+
+{% block content %}
+<div class="space-y-6 max-w-6xl mx-auto">
+    <!-- Header -->
+    <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200/60 dark:border-slate-700/50 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h1 class="text-xl font-black text-slate-800 dark:text-white">Curriculum Timetable Setup</h1>
+            <p class="text-slate-500 dark:text-slate-400 text-xs mt-1">Select class parameters to load and modify the weekly schedule grid matrix.</p>
+        </div>
+        
+        <!-- Filter selections -->
+        <form method="GET" class="flex gap-3 items-center">
+            <select name="department" onchange="this.form.submit()" class="rounded-xl border border-slate-250 bg-slate-50 dark:bg-slate-700 px-3 py-2 text-xs font-bold text-slate-700 dark:text-slate-200 focus:outline-none">
+                {% for d in departments %}
+                <option value="{{ d }}" {% if dept == d %}selected{% endif %}>{{ d }}</option>
+                {% endfor %}
+            </select>
+            <select name="semester" onchange="this.form.submit()" class="rounded-xl border border-slate-250 bg-slate-50 dark:bg-slate-700 px-3 py-2 text-xs font-bold text-slate-700 dark:text-slate-200 focus:outline-none">
+                {% for s in range(1, 7) %}
+                <option value="{{ s }}" {% if sem == s %}selected{% endif %}>Sem {{ s }}</option>
+                {% endfor %}
+            </select>
+        </form>
+    </div>
+
+    <!-- Edit slot form and matrix table -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- Left: Update slot form -->
+        <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/60 dark:border-slate-700/50 shadow-sm p-6 space-y-4 h-fit">
+            <h3 class="font-black text-slate-850 dark:text-white text-md border-b border-slate-100 dark:border-slate-700/60 pb-3">Configure Slot</h3>
+            
+            <form method="POST" class="space-y-4">
+                <input type="hidden" name="department" value="{{ dept }}">
+                <input type="hidden" name="semester" value="{{ sem }}">
+                
+                <div>
+                    <label class="block text-[10px] font-black uppercase tracking-wider text-slate-455 mb-1">Select Weekday</label>
+                    <select name="day" required class="w-full rounded-xl border border-slate-250 bg-slate-50 dark:bg-slate-700 px-3 py-2 text-xs text-slate-800 dark:text-slate-100 focus:outline-none">
+                        <option value="Monday">Monday</option>
+                        <option value="Tuesday">Tuesday</option>
+                        <option value="Wednesday">Wednesday</option>
+                        <option value="Thursday">Thursday</option>
+                        <option value="Friday">Friday</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-black uppercase tracking-wider text-slate-455 mb-1">Period Hour</label>
+                    <select name="hour" required class="w-full rounded-xl border border-slate-250 bg-slate-50 dark:bg-slate-700 px-3 py-2 text-xs text-slate-800 dark:text-slate-100 focus:outline-none">
+                        {% for h in range(1, 6) %}
+                        <option value="{{ h }}">Hour {{ h }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-black uppercase tracking-wider text-slate-455 mb-1">Course Subject Name</label>
+                    <input type="text" name="subject" required placeholder="e.g. Compiler Design" class="w-full rounded-xl border border-slate-250 bg-slate-50 dark:bg-slate-700 px-3 py-2 text-xs text-slate-800 dark:text-slate-100 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-black uppercase tracking-wider text-slate-455 mb-1">Assigned Instructor Faculty</label>
+                    <select name="staff_id" class="w-full rounded-xl border border-slate-250 bg-slate-50 dark:bg-slate-700 px-3 py-2 text-xs text-slate-800 dark:text-slate-100 focus:outline-none">
+                        <option value="">-- Leave Free --</option>
+                        {% for m in staff_members %}
+                        <option value="{{ m._id }}">{{ m.name }} ({{ m.email }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="w-full py-3 bg-primary-600 hover:bg-primary-500 text-white text-xs font-bold rounded-xl shadow-md transition-all">
+                    Save Slot Assignment
+                </button>
+            </form>
+        </div>
+
+        <!-- Right: Matrix table grid -->
+        <div class="lg:col-span-2 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/60 dark:border-slate-700/50 shadow-sm overflow-hidden p-6 space-y-4">
+            <div class="border-b border-slate-100 dark:border-slate-700/60 pb-3">
+                <h3 class="font-black text-slate-850 dark:text-white text-md">Weekly Schedule: {{ dept }} Sem {{ sem }}</h3>
+            </div>
+
+            <div class="timetable-wrapper">
+                <div class="timetable-grid min-w-[700px] divide-x divide-slate-150 dark:divide-slate-700">
+                    <div class="bg-slate-50 dark:bg-slate-900/20 px-3 py-2.5 text-[9px] font-black uppercase text-slate-400">Day</div>
+                    {% for h in range(1, 6) %}
+                    <div class="bg-slate-50 dark:bg-slate-900/20 px-3 py-2.5 text-[9px] font-black uppercase text-slate-400 text-center">Period {{ h }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="divide-y divide-slate-100 dark:divide-slate-700/60">
+                    {% for day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'] %}
+                    <div class="timetable-grid min-w-[700px] divide-x divide-slate-150 dark:divide-slate-700 items-stretch">
+                        <div class="px-3 py-4 font-black text-xs text-slate-850 dark:text-slate-200 flex items-center bg-slate-50/50 dark:bg-slate-900/10">
+                            {{ day }}
+                        </div>
+                        
+                        {% for h in range(1, 6) %}
+                        {% set slot = grid[day][h] %}
+                        <div class="px-3 py-4 text-center flex flex-col justify-center transition-all hover:bg-slate-500/5 min-h-[70px]">
+                            {% if slot.subject %}
+                            <span class="text-xs font-black text-primary-600 dark:text-primary-400 leading-snug">{{ slot.subject }}</span>
+                            <span class="text-[9px] font-bold text-slate-400 uppercase mt-0.5" title="Instructor: {{ slot.staff_name }}">{{ slot.staff_name }}</span>
+                            {% else %}
+                            <span class="text-slate-200 dark:text-slate-700 text-[10px] font-black uppercase">-</span>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

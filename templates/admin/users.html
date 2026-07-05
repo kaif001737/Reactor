@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+{% block title %}Users Management | MeasiConnect{% endblock %}
+{% block section_title %}User Profiles{% endblock %}
+
+{% block content %}
+<div class="space-y-6 max-w-6xl mx-auto">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h1 class="text-xl font-black text-slate-800 dark:text-white">User Management console</h1>
+            <p class="text-slate-500 dark:text-slate-400 text-xs">Register MCA students, staff, and admin accounts. Students can also be seed-loaded from student list.</p>
+        </div>
+        <button onclick="document.getElementById('createModal').classList.remove('hidden')" class="px-5 py-2.5 bg-primary-600 hover:bg-primary-500 text-white rounded-xl text-xs font-bold shadow-md shadow-primary-500/10 transition-all shrink-0">
+            Create User Account
+        </button>
+    </div>
+
+    <!-- Filters Search Form -->
+    <form method="GET" class="flex flex-wrap gap-3 bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200/60 dark:border-slate-700/50 shadow-sm">
+        <input type="text" name="search" value="{{ search }}" placeholder="Search name, register no, email..."
+               class="flex-1 min-w-[200px] rounded-xl border border-slate-200 dark:border-slate-650 bg-slate-50 dark:bg-slate-700 px-4 py-2.5 text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-500">
+        <select name="role" onchange="this.form.submit()" class="rounded-xl border border-slate-200 dark:border-slate-650 bg-slate-50 dark:bg-slate-700 px-3 py-2 text-xs text-slate-800 dark:text-slate-100 focus:outline-none">
+            <option value="">All Roles</option>
+            <option value="student" {% if role_filter == 'student' %}selected{% endif %}>Student</option>
+            <option value="staff" {% if role_filter == 'staff' %}selected{% endif %}>Staff</option>
+            <option value="admin" {% if role_filter == 'admin' %}selected{% endif %}>Admin</option>
+        </select>
+    </form>
+
+    <!-- Users List Table -->
+    <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/60 dark:border-slate-700/50 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs border-collapse">
+                <thead>
+                    <tr class="bg-slate-50 dark:bg-slate-900/40 border-b border-slate-200/60 dark:border-slate-700/60 text-slate-400 font-black uppercase tracking-wider">
+                        <th class="px-6 py-4">Account User</th>
+                        <th class="px-6 py-4">System Role</th>
+                        <th class="px-6 py-4">Department</th>
+                        <th class="px-6 py-4">Semester</th>
+                        <th class="px-6 py-4">Credentials ID</th>
+                        <th class="px-6 py-4 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50 font-medium">
+                    {% for u in users %}
+                    <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-750/10 transition-colors">
+                        <td class="px-6 py-4 font-bold text-slate-800 dark:text-slate-100">
+                            {{ u.name }}
+                        </td>
+                        <td class="px-6 py-4 capitalize">
+                            <span class="inline-block px-2.5 py-0.5 rounded text-[10px] font-black uppercase tracking-wider
+                                {% if u.role == 'student' %}bg-primary-50 text-primary-650 dark:bg-primary-950/20 dark:text-primary-400
+                                {% elif u.role == 'staff' %}bg-emerald-50 text-emerald-650 dark:bg-emerald-950/20 dark:text-emerald-400
+                                {% else %}bg-purple-50 text-purple-650 dark:bg-purple-950/20 dark:text-purple-400{% endif %}">
+                                {{ u.role }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4">
+                            {{ u.department or '-' }}
+                        </td>
+                        <td class="px-6 py-4 text-slate-500 dark:text-slate-400">
+                            {% if u.role == 'student' %}Semester {{ u.semester or 1 }}{% else %}-{% endif %}
+                        </td>
+                        <td class="px-6 py-4 font-mono text-slate-500">
+                            {% if u.role == 'student' %}{{ u.roll_no }}{% else %}{{ u.email }}{% endif %}
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            {% if u.role != 'admin' or u.email != 'admin@measiit.edu.in' %}
+                            <form method="POST" action="{{ url_for('admin.delete_user', user_id=u._id) }}" class="inline" onsubmit="return confirm('Delete this user? This will remove all their logs.')">
+                                <button type="submit" class="text-[10px] font-black text-rose-500 hover:text-rose-600 hover:underline">Delete</button>
+                            </form>
+                            {% else %}
+                            <span class="text-[10px] text-slate-300 font-bold uppercase select-none">Protected</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="px-6 py-8 text-center text-slate-400 font-semibold">No registered users matched the query.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Create Modal Dialog -->
+<div id="createModal" class="hidden fixed inset-0 bg-slate-950/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 w-full max-w-md border border-slate-200 dark:border-slate-700 shadow-2xl space-y-4">
+        <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-700/60 pb-3">
+            <h3 class="font-black text-slate-850 dark:text-white text-md">Register User Account</h3>
+            <button onclick="document.getElementById('createModal').classList.add('hidden')" class="p-1 text-slate-400 hover:text-slate-650 focus:outline-none">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+
+        <form method="POST" class="space-y-4">
+            <input type="hidden" name="action" value="create">
+            
+            <div>
+                <label class="block text-[10px] font-black uppercase tracking-wider text-slate-455 mb-1">System Role</label>
+                <select name="role" id="modal-role-select" required class="w-full rounded-xl border border-slate-250 bg-slate-50 dark:bg-slate-700 px-3 py-2 text-xs focus:outline-none text-slate-800 dark:text-slate-100">
+                    <option value="student">Student</option>
+                    <option value="staff">Staff Faculty</option>
+                    <option value="admin">Administrator</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-[10px] font-black uppercase tracking-wider text-slate-455 mb-1">Full Name</label>
+                <input name="name" required placeholder="e.g. Kaif Ahmed" class="w-full rounded-xl border border-slate-250 bg-slate-50 dark:bg-slate-700 px-3 py-2 text-xs focus:outline-none text-slate-800 dark:text-slate-100">
+            </div>
+            
+            <!-- Student Register Inputs -->
+            <div id="modal-student-group" class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-[10px] font-black uppercase tracking-wider text-slate-455 mb-1">Roll / Register No</label>
+                    <input name="roll_no" id="modal-roll-input" placeholder="e.g. 26118005" class="w-full rounded-xl border border-slate-250 bg-slate-50 dark:bg-slate-700 px-3 py-2 text-xs focus:outline-none text-slate-800 dark:text-slate-100">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-black uppercase tracking-wider text-slate-455 mb-1">Semester</label>
+                    <select name="semester" class="w-full rounded-xl border border-slate-250 bg-slate-50 dark:bg-slate-700 px-3 py-2 text-xs focus:outline-none text-slate-800 dark:text-slate-100">
+                        {% for s in range(1, 7) %}
+                        <option value="{{ s }}">Sem {{ s }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div id="modal-email-group" class="hidden">
+                <label class="block text-[10px] font-black uppercase tracking-wider text-slate-455 mb-1">Email ID</label>
+                <input name="email" id="modal-email-input" type="email" placeholder="you@measiit.edu.in" class="w-full rounded-xl border border-slate-250 bg-slate-50 dark:bg-slate-700 px-3 py-2 text-xs focus:outline-none text-slate-800 dark:text-slate-100">
+            </div>
+
+            <div>
+                <label class="block text-[10px] font-black uppercase tracking-wider text-slate-455 mb-1">Department</label>
+                <select name="department" class="w-full rounded-xl border border-slate-250 bg-slate-50 dark:bg-slate-700 px-3 py-2 text-xs focus:outline-none text-slate-800 dark:text-slate-100">
+                    {% for d in departments %}
+                    <option value="{{ d }}">{{ d }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="flex gap-3.5 pt-3 border-t border-slate-100 dark:border-slate-700/60">
+                <button type="submit" class="flex-1 py-2.5 bg-primary-600 hover:bg-primary-500 text-white rounded-xl text-xs font-bold shadow-md transition-colors">Register Account</button>
+                <button type="button" onclick="document.getElementById('createModal').classList.add('hidden')" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-650 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold transition-colors">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const roleSelect = document.getElementById('modal-role-select');
+    const studentGroup = document.getElementById('modal-student-group');
+    const emailGroup = document.getElementById('modal-email-group');
+    const rollInput = document.getElementById('modal-roll-input');
+    const emailInput = document.getElementById('modal-email-input');
+
+    if (roleSelect) {
+        roleSelect.addEventListener('change', () => {
+            const role = roleSelect.value;
+            if (role === 'student') {
+                studentGroup.classList.remove('hidden');
+                emailGroup.classList.add('hidden');
+                rollInput.required = true;
+                emailInput.required = false;
+            } else {
+                studentGroup.classList.add('hidden');
+                emailGroup.classList.remove('hidden');
+                rollInput.required = false;
+                emailInput.required = true;
+            }
+        });
+        
+        // Initial sync
+        roleSelect.dispatchEvent(new Event('change'));
+    }
+</script>
+{% endblock %}

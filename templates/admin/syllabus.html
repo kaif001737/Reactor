@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+{% block title %}Manage Syllabus | MeasiConnect{% endblock %}
+{% block section_title %}Syllabus Manager{% endblock %}
+
+{% block content %}
+<div class="space-y-6 max-w-5xl mx-auto">
+    <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200/60 dark:border-slate-700/50 shadow-sm">
+        <h1 class="text-xl font-black text-slate-800 dark:text-white">Upload Syllabus by Subject</h1>
+        <p class="text-slate-500 dark:text-slate-400 text-xs mt-1">Upload one syllabus per subject. Students and staff will see it instantly in their Syllabus section.</p>
+    </div>
+
+    <!-- Filter class -->
+    <form method="GET" class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200/60 dark:border-slate-700/50 shadow-sm flex flex-wrap gap-3 items-end">
+        <div>
+            <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Department</label>
+            <select name="department" class="rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 px-3 py-2 text-sm">
+                {% for d in departments %}
+                <option value="{{ d }}" {% if d == dept %}selected{% endif %}>{{ d }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Semester</label>
+            <select name="semester" class="rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 px-3 py-2 text-sm">
+                {% for s in range(1, 7) %}
+                <option value="{{ s }}" {% if s == sem %}selected{% endif %}>Semester {{ s }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="px-4 py-2 bg-slate-200 dark:bg-slate-600 rounded-xl text-sm font-bold">Load</button>
+    </form>
+
+    <!-- Upload form -->
+    <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200/60 dark:border-slate-700/50 shadow-sm">
+        <h2 class="font-black text-slate-800 dark:text-white text-sm mb-4">Upload New Syllabus — {{ dept }} Sem {{ sem }}</h2>
+        <form method="POST" enctype="multipart/form-data" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <input type="hidden" name="action" value="upload">
+            <input type="hidden" name="department" value="{{ dept }}">
+            <input type="hidden" name="semester" value="{{ sem }}">
+            <div>
+                <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Subject *</label>
+                {% if subjects %}
+                <select name="subject" required class="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 px-3 py-2 text-sm">
+                    <option value="">Select subject</option>
+                    {% for sub in subjects %}
+                    <option value="{{ sub }}">{{ sub }}</option>
+                    {% endfor %}
+                </select>
+                {% else %}
+                <input name="subject" required placeholder="e.g. Data Structures"
+                       class="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 px-3 py-2 text-sm">
+                <p class="text-[10px] text-slate-400 mt-1">No timetable subjects yet — type subject name manually.</p>
+                {% endif %}
+            </div>
+            <div>
+                <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Title (optional)</label>
+                <input name="title" placeholder="e.g. DS Unit-wise Syllabus"
+                       class="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 px-3 py-2 text-sm">
+            </div>
+            <div class="md:col-span-2">
+                <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Description (optional)</label>
+                <input name="description" placeholder="Brief note about this syllabus"
+                       class="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 px-3 py-2 text-sm">
+            </div>
+            <div class="md:col-span-2">
+                <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Syllabus File * (PDF, DOC, DOCX)</label>
+                <input type="file" name="file" required accept=".pdf,.doc,.docx"
+                       class="w-full text-sm text-slate-600 dark:text-slate-300">
+            </div>
+            <div class="md:col-span-2">
+                <button type="submit" class="px-6 py-2.5 bg-primary-600 hover:bg-primary-500 text-white font-bold rounded-xl text-sm">Upload Syllabus</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Existing syllabi -->
+    <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/60 dark:border-slate-700/50 shadow-sm overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-200/60 dark:border-slate-700/60 bg-slate-50/50 dark:bg-slate-900/10">
+            <h2 class="font-black text-slate-800 dark:text-white text-sm">Uploaded Syllabi ({{ files|length }})</h2>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+                <thead class="bg-slate-50 dark:bg-slate-900/40 text-slate-400 font-black uppercase text-[9px]">
+                    <tr>
+                        <th class="px-6 py-3">Subject</th>
+                        <th class="px-6 py-3">Title</th>
+                        <th class="px-6 py-3">File</th>
+                        <th class="px-6 py-3">Uploaded</th>
+                        <th class="px-6 py-3 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50">
+                    {% for f in files %}
+                    <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-750/10">
+                        <td class="px-6 py-4 font-bold text-primary-600 dark:text-primary-400">{{ f.subject or '—' }}</td>
+                        <td class="px-6 py-4 font-bold text-slate-800 dark:text-slate-100">{{ f.title }}</td>
+                        <td class="px-6 py-4 font-mono text-[10px] text-slate-400">{{ f.original_name }}</td>
+                        <td class="px-6 py-4 text-slate-400">{{ f.uploaded_at.strftime('%Y-%m-%d') if f.uploaded_at else 'N/A' }}</td>
+                        <td class="px-6 py-4 text-right flex justify-end gap-3">
+                            <a href="{{ url_for('static', filename='uploads/files/' ~ f.filename) }}" download="{{ f.original_name }}"
+                               class="text-[10px] font-black text-primary-600 hover:underline">Download</a>
+                            <form method="POST" class="inline" onsubmit="return confirm('Delete this syllabus?')">
+                                <input type="hidden" name="action" value="delete">
+                                <input type="hidden" name="file_id" value="{{ f._id }}">
+                                <input type="hidden" name="department" value="{{ dept }}">
+                                <input type="hidden" name="semester" value="{{ sem }}">
+                                <button type="submit" class="text-[10px] font-black text-rose-500 hover:underline">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="5" class="px-6 py-10 text-center text-slate-400">No syllabus uploaded for this class yet.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% block title %}Leave Application | MeasiConnect{% endblock %}
+{% block section_title %}Leave Application{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6">
+    <!-- Apply form -->
+    <div class="portal-card p-6">
+        <h3 class="font-bold text-navy mb-1">Submit Leave Request</h3>
+        <p class="text-xs text-slate-500 mb-5">Apply for leave and track approval status from faculty.</p>
+        <form method="POST" class="space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                    <label class="form-label">Leave Type</label>
+                    <select name="leave_type" class="form-input">
+                        <option value="personal">Personal</option>
+                        <option value="medical">Medical</option>
+                        <option value="emergency">Emergency</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="form-label">From Date</label>
+                    <input type="date" name="from_date" required class="form-input">
+                </div>
+                <div>
+                    <label class="form-label">To Date</label>
+                    <input type="date" name="to_date" required class="form-input">
+                </div>
+            </div>
+            <div>
+                <label class="form-label">Reason</label>
+                <textarea name="reason" rows="3" required placeholder="Describe the reason for your leave..." class="form-input"></textarea>
+            </div>
+            <button type="submit" class="btn-primary">Submit Application</button>
+        </form>
+    </div>
+
+    <!-- History -->
+    <div class="portal-card overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-100">
+            <h3 class="font-bold text-navy">My Leave History</h3>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="portal-table">
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>From</th>
+                        <th>To</th>
+                        <th>Reason</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in requests %}
+                    <tr>
+                        <td><span class="badge badge-navy capitalize">{{ r.leave_type }}</span></td>
+                        <td class="font-medium">{{ r.from_date.strftime('%d %b %Y') }}</td>
+                        <td class="font-medium">{{ r.to_date.strftime('%d %b %Y') }}</td>
+                        <td class="text-slate-600 max-w-[200px] truncate">{{ r.reason }}</td>
+                        <td>
+                            <span class="badge {% if r.status == 'approved' %}badge-success{% elif r.status == 'rejected' %}badge-danger{% else %}badge-warning{% endif %} capitalize">{{ r.status }}</span>
+                            {% if r.review_note %}
+                            <p class="text-[10px] text-slate-400 mt-1">{{ r.review_note }}</p>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="5" class="text-center py-8 text-slate-400">No leave applications yet.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

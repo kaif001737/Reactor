@@ -1,0 +1,340 @@
+/* MeasiConnect — Professional College Portal (Light Theme) */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap');
+
+:root {
+    --college-navy: #1e3a5f;
+    --college-navy-light: #2d5282;
+    --college-gold: #c9a227;
+    --college-gold-light: #f5e6b8;
+    --college-cream: #faf8f5;
+    --college-border: #e2e8f0;
+    --college-text: #1e293b;
+    --college-muted: #64748b;
+    --college-success: #059669;
+    --college-danger: #dc2626;
+    --sidebar-width: 260px;
+}
+
+body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background-color: var(--college-cream);
+    color: var(--college-text);
+}
+
+.font-display {
+    font-family: 'Playfair Display', Georgia, serif;
+}
+
+/* ── Sidebar ── */
+.sidebar {
+    background: #ffffff;
+    border-right: 1px solid var(--college-border);
+    box-shadow: 2px 0 12px rgba(30, 58, 95, 0.04);
+}
+
+.sidebar-brand {
+    background: linear-gradient(135deg, var(--college-navy) 0%, var(--college-navy-light) 100%);
+    border-bottom: 3px solid var(--college-gold);
+}
+
+.sidebar-brand h1 {
+    font-family: 'Playfair Display', Georgia, serif;
+    letter-spacing: -0.02em;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.65rem 1rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    border-radius: 0.5rem;
+    color: var(--college-muted);
+    transition: all 0.15s ease;
+    margin-bottom: 2px;
+}
+
+.nav-link:hover {
+    background: #f1f5f9;
+    color: var(--college-navy);
+}
+
+.nav-link.active {
+    background: linear-gradient(90deg, rgba(30, 58, 95, 0.08) 0%, rgba(30, 58, 95, 0.02) 100%);
+    color: var(--college-navy);
+    font-weight: 600;
+    border-left: 3px solid var(--college-gold);
+    padding-left: calc(1rem - 3px);
+}
+
+.nav-section-label {
+    font-size: 0.625rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #94a3b8;
+    padding: 1rem 1rem 0.375rem;
+}
+
+/* ── Header ── */
+.portal-header {
+    background: #ffffff;
+    border-bottom: 1px solid var(--college-border);
+    box-shadow: 0 1px 3px rgba(30, 58, 95, 0.04);
+}
+
+.header-accent {
+    height: 3px;
+    background: linear-gradient(90deg, var(--college-navy) 0%, var(--college-gold) 50%, var(--college-navy) 100%);
+}
+
+/* ── Cards ── */
+.portal-card {
+    background: #ffffff;
+    border: 1px solid var(--college-border);
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 3px rgba(30, 58, 95, 0.04);
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.portal-card:hover {
+    box-shadow: 0 4px 12px rgba(30, 58, 95, 0.08);
+}
+
+.stat-card {
+    background: #ffffff;
+    border: 1px solid var(--college-border);
+    border-radius: 0.75rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--college-navy);
+}
+
+.stat-card.stat-success::before { background: var(--college-success); }
+.stat-card.stat-warning::before { background: var(--college-gold); }
+.stat-card.stat-danger::before { background: var(--college-danger); }
+.stat-card.stat-primary::before { background: var(--college-navy-light); }
+
+/* ── Buttons ── */
+.btn-primary {
+    background: var(--college-navy);
+    color: #fff;
+    font-weight: 600;
+    padding: 0.625rem 1.25rem;
+    border-radius: 0.5rem;
+    font-size: 0.8125rem;
+    transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.btn-primary:hover {
+    background: var(--college-navy-light);
+}
+
+.btn-gold {
+    background: var(--college-gold);
+    color: var(--college-navy);
+    font-weight: 700;
+}
+
+.btn-gold:hover {
+    background: #b8911f;
+}
+
+/* ── Badges ── */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.6rem;
+    border-radius: 9999px;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.badge-navy { background: rgba(30, 58, 95, 0.1); color: var(--college-navy); }
+.badge-gold { background: var(--college-gold-light); color: #7a6010; }
+.badge-success { background: #d1fae5; color: #065f46; }
+.badge-warning { background: #fef3c7; color: #92400e; }
+.badge-danger { background: #fee2e2; color: #991b1b; }
+
+/* ── Forms ── */
+.form-input {
+    width: 100%;
+    padding: 0.625rem 0.875rem;
+    border: 1px solid var(--college-border);
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--college-text);
+    background: #fff;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--college-navy);
+    box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.1);
+}
+
+.form-label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--college-muted);
+    margin-bottom: 0.375rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+/* ── Tables ── */
+.portal-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8125rem;
+}
+
+.portal-table thead {
+    background: #f8fafc;
+    border-bottom: 2px solid var(--college-border);
+}
+
+.portal-table th {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--college-muted);
+}
+
+.portal-table td {
+    padding: 0.875rem 1rem;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.portal-table tbody tr:hover {
+    background: #fafbfc;
+}
+
+/* ── Hero banner ── */
+.hero-banner {
+    background: linear-gradient(135deg, var(--college-navy) 0%, var(--college-navy-light) 100%);
+    border-radius: 0.75rem;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-banner::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(201, 162, 39, 0.15) 0%, transparent 70%);
+    border-radius: 50%;
+}
+
+/* ── Quick action tiles ── */
+.action-tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 1.25rem 1rem;
+    border-radius: 0.75rem;
+    border: 1px solid var(--college-border);
+    background: #fff;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    color: inherit;
+}
+
+.action-tile:hover {
+    border-color: var(--college-navy);
+    box-shadow: 0 4px 12px rgba(30, 58, 95, 0.1);
+    transform: translateY(-2px);
+}
+
+.action-tile-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.625rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.625rem;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+/* ── Timetable ── */
+.timetable-grid {
+    display: grid;
+    grid-template-columns: 100px repeat(5, minmax(140px, 1fr));
+}
+
+@media (max-width: 768px) {
+    .timetable-wrapper { overflow-x: auto; }
+}
+
+/* ── Timeline ── */
+.timeline-dot { position: relative; }
+.timeline-dot::after {
+    content: '';
+    position: absolute;
+    bottom: -1.75rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2px;
+    height: 1.75rem;
+    background: var(--college-border);
+}
+.timeline-item:last-child .timeline-dot::after { display: none; }
+
+/* ── Animations ── */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+    animation: fadeInUp 0.4s ease forwards;
+}
+
+@keyframes custom-pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.15); opacity: 0.8; }
+}
+
+.animate-custom-pulse {
+    animation: custom-pulse 2s infinite;
+}
+
+/* ── Event calendar dot ── */
+.event-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--college-gold);
+    display: inline-block;
+}
+
+/* ── Login page (standalone — styles live in login.html) ── */

@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% block title %}Notice Board Setup | MeasiConnect{% endblock %}
+{% block section_title %}Notice Board Manager{% endblock %}
+
+{% block content %}
+<div class="space-y-6 max-w-5xl mx-auto">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- Left: Write Announcement -->
+        <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/60 dark:border-slate-700/50 shadow-sm p-6 space-y-4 h-fit">
+            <h3 class="font-black text-slate-850 dark:text-white text-md border-b border-slate-100 dark:border-slate-700/60 pb-3">Post Announcement</h3>
+            
+            <form method="POST" class="space-y-4">
+                <input type="hidden" name="action" value="create">
+                <div>
+                    <label class="block text-[10px] font-black uppercase tracking-wider text-slate-455 mb-1">Announcement Title</label>
+                    <input type="text" name="title" required placeholder="e.g. End Semester Exam Timetable Released"
+                           class="w-full rounded-xl border border-slate-250 bg-slate-50 dark:bg-slate-700 px-3 py-2 text-xs text-slate-850 dark:text-slate-100 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-black uppercase tracking-wider text-slate-455 mb-1">Notice Content details</label>
+                    <textarea name="content" required placeholder="Provide notice content..." rows="5"
+                              class="w-full rounded-xl border border-slate-250 bg-slate-50 dark:bg-slate-700 px-3 py-2 text-xs text-slate-850 dark:text-slate-100 focus:outline-none"></textarea>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-black uppercase tracking-wider text-slate-455 mb-1">Target User Role</label>
+                    <select name="target_role" required class="w-full rounded-xl border border-slate-250 bg-slate-50 dark:bg-slate-700 px-3 py-2 text-xs text-slate-850 dark:text-slate-100 focus:outline-none">
+                        <option value="all">All Portal Users</option>
+                        <option value="student">Students Only</option>
+                        <option value="staff">Staff Only</option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[10px] font-black uppercase tracking-wider text-slate-455 mb-1">Department</label>
+                        <select name="target_dept" required class="w-full rounded-xl border border-slate-250 bg-slate-50 dark:bg-slate-700 px-3 py-2 text-xs text-slate-850 dark:text-slate-100 focus:outline-none">
+                            <option value="all">All Depts</option>
+                            {% for d in departments %}
+                            <option value="{{ d }}">{{ d }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black uppercase tracking-wider text-slate-455 mb-1">Semester</label>
+                        <select name="target_semester" required class="w-full rounded-xl border border-slate-250 bg-slate-50 dark:bg-slate-700 px-3 py-2 text-xs text-slate-850 dark:text-slate-100 focus:outline-none">
+                            <option value="0">All Semesters</option>
+                            {% for s in range(1, 7) %}
+                            <option value="{{ s }}">Sem {{ s }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="w-full py-3 bg-primary-600 hover:bg-primary-500 text-white text-xs font-bold rounded-xl shadow-md transition-all">
+                    Broadcast Notice
+                </button>
+            </form>
+        </div>
+
+        <!-- Right: Posted announcements list -->
+        <div class="lg:col-span-2 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/60 dark:border-slate-700/50 shadow-sm p-6 space-y-4">
+            <h3 class="font-black text-slate-855 dark:text-white text-md border-b border-slate-100 dark:border-slate-700/60 pb-3">Active Board Notices</h3>
+            
+            <div class="space-y-4">
+                {% for a in announcements %}
+                <div class="p-4 bg-slate-50 dark:bg-slate-900/35 border border-slate-100 dark:border-slate-800 rounded-2xl">
+                    <div class="flex justify-between items-start gap-2">
+                        <h4 class="font-bold text-xs text-slate-850 dark:text-slate-200">{{ a.title }}</h4>
+                        <span class="text-[9px] text-slate-400 font-semibold shrink-0">{{ a.created_at.strftime('%Y-%m-%d %H:%M') if a.created_at else 'N/A' }}</span>
+                    </div>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-2 leading-relaxed whitespace-pre-line">{{ a.content }}</p>
+                    
+                    <div class="mt-4 flex items-center justify-between border-t border-slate-100 dark:border-slate-700/50 pt-3">
+                        <div class="text-[9px] text-slate-450 uppercase font-black tracking-wide">
+                            <span>Author: {{ a.created_by_name }} &bull; Target: {{ a.target_role }} {% if a.target_dept != 'all' %}({{ a.target_dept }}){% endif %}</span>
+                        </div>
+                        <form method="POST" onsubmit="return confirm('Delete this notice?')" class="inline">
+                            <input type="hidden" name="action" value="delete">
+                            <input type="hidden" name="ann_id" value="{{ a._id }}">
+                            <button type="submit" class="text-[10px] font-black text-rose-500 hover:underline">
+                                Delete
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% else %}
+                <div class="py-12 text-center text-slate-450 text-xs font-semibold">
+                    No notice announcements have been broadcasted yet.
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

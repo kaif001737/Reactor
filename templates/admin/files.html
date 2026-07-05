@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block title %}Shared Storage Files | MeasiConnect{% endblock %}
+{% block section_title %}Shared Files{% endblock %}
+
+{% block content %}
+<div class="space-y-6 max-w-5xl mx-auto">
+    <!-- Header -->
+    <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200/60 dark:border-slate-700/50 shadow-sm">
+        <h1 class="text-xl font-black text-slate-800 dark:text-white">Central Shared Resources Storage</h1>
+        <p class="text-slate-500 dark:text-slate-400 text-xs mt-1">Review, audit, or delete files uploaded by instructors acrossMCA subjects. Total: <strong>{{ files|length }} files active</strong>.</p>
+    </div>
+
+    <!-- Storage Table -->
+    <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/60 dark:border-slate-700/50 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs border-collapse">
+                <thead>
+                    <tr class="bg-slate-50 dark:bg-slate-900/40 border-b border-slate-200/60 dark:border-slate-700/60 text-slate-400 font-black uppercase tracking-wider">
+                        <th class="px-6 py-4">Resource Details</th>
+                        <th class="px-6 py-4">Course target</th>
+                        <th class="px-6 py-4">Category type</th>
+                        <th class="px-6 py-4">Uploaded By</th>
+                        <th class="px-6 py-4">Uploaded At</th>
+                        <th class="px-6 py-4 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50 font-medium">
+                    {% for f in files %}
+                    <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-750/10 transition-colors">
+                        <td class="px-6 py-4 font-bold text-slate-800 dark:text-slate-100">
+                            <span class="block truncate max-w-[200px]" title="{{ f.title }}">{{ f.title }}</span>
+                            <span class="text-[9px] text-slate-400 font-mono mt-0.5 block truncate max-w-[150px]">{{ f.original_name }}</span>
+                        </td>
+                        <td class="px-6 py-4 text-slate-605">
+                            {{ f.department }} Sem {{ f.semester }}
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="inline-block px-2.5 py-1 text-[9px] font-black rounded-lg uppercase tracking-wider
+                                {% if f.file_type == 'assignment' %}bg-amber-100 text-amber-800 dark:bg-amber-950/20 dark:text-amber-400
+                                {% elif f.file_type == 'syllabus' %}bg-purple-100 text-purple-800 dark:bg-purple-950/20 dark:text-purple-400
+                                {% else %}bg-primary-100 text-primary-800 dark:bg-primary-950/20 dark:text-primary-400{% endif %}">
+                                {{ f.file_type.replace('_', ' ') }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4">
+                            {{ f.uploaded_by_name }}
+                        </td>
+                        <td class="px-6 py-4 text-slate-400">
+                            {{ f.uploaded_at.strftime('%Y-%m-%d') if f.uploaded_at else 'N/A' }}
+                        </td>
+                        <td class="px-6 py-4 text-right flex justify-end gap-3.5">
+                            <a href="{{ url_for('static', filename='uploads/files/' ~ f.filename) }}" download="{{ f.original_name }}" class="text-[10px] font-black text-primary-600 hover:underline">Download</a>
+                            <form method="POST" onsubmit="return confirm('Delete this file?')" class="inline">
+                                <input type="hidden" name="file_id" value="{{ f._id }}">
+                                <button type="submit" class="text-[10px] font-black text-rose-500 hover:text-rose-600 hover:underline">
+                                    Delete
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="px-6 py-12 text-center text-slate-400 font-semibold">
+                            No shared resources files exist in the portal database.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

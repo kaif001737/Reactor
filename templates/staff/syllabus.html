@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block title %}Course Syllabus | MeasiConnect{% endblock %}
+{% block section_title %}Syllabus Center{% endblock %}
+
+{% block content %}
+<div class="space-y-6 max-w-5xl mx-auto">
+    <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200/60 dark:border-slate-700/50 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h1 class="text-xl font-black text-slate-800 dark:text-white">Subject Syllabus</h1>
+            <p class="text-slate-500 dark:text-slate-400 text-xs mt-1">Official syllabus documents uploaded by admin for each subject.</p>
+        </div>
+    </div>
+
+    <form method="GET" class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200/60 dark:border-slate-700/50 shadow-sm flex flex-wrap gap-3 items-end">
+        <div>
+            <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Department</label>
+            <select name="department" class="rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 px-3 py-2 text-sm">
+                {% for d in departments %}
+                <option value="{{ d }}" {% if d == dept %}selected{% endif %}>{{ d }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Semester</label>
+            <select name="semester" class="rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 px-3 py-2 text-sm">
+                {% for s in range(1, 7) %}
+                <option value="{{ s }}" {% if s == sem %}selected{% endif %}>Semester {{ s }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="px-4 py-2 bg-primary-600 text-white rounded-xl text-sm font-bold">View</button>
+    </form>
+
+    <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/60 dark:border-slate-700/50 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+                <thead class="bg-slate-50 dark:bg-slate-900/40 text-slate-400 font-black uppercase text-[9px]">
+                    <tr>
+                        <th class="px-6 py-4">Subject</th>
+                        <th class="px-6 py-4">Title</th>
+                        <th class="px-6 py-4">Description</th>
+                        <th class="px-6 py-4">Updated</th>
+                        <th class="px-6 py-4 text-right">Download</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50">
+                    {% for f in files %}
+                    <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-750/10">
+                        <td class="px-6 py-4 font-bold text-primary-600 dark:text-primary-400">{{ f.subject or '—' }}</td>
+                        <td class="px-6 py-4 font-bold text-slate-800 dark:text-slate-100">{{ f.title }}</td>
+                        <td class="px-6 py-4 text-slate-500">{{ f.description or '—' }}</td>
+                        <td class="px-6 py-4 text-slate-400">{{ f.uploaded_at.strftime('%Y-%m-%d') if f.uploaded_at else 'N/A' }}</td>
+                        <td class="px-6 py-4 text-right">
+                            <a href="{{ url_for('static', filename='uploads/files/' ~ f.filename) }}" download="{{ f.original_name }}"
+                               class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary-50 hover:bg-primary-100 dark:bg-primary-950/20 text-primary-600 dark:text-primary-400 rounded-lg font-bold">
+                                Download
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="5" class="px-6 py-12 text-center text-slate-400">No syllabus uploaded for {{ dept }} Semester {{ sem }} yet.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

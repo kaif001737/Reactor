@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block title %}Leave Requests | MeasiConnect{% endblock %}
+{% block section_title %}Leave Requests{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto space-y-6">
+    <div class="flex gap-2">
+        {% for s in [('pending', 'Pending'), ('approved', 'Approved'), ('rejected', 'Rejected'), ('all', 'All')] %}
+        <a href="?status={{ s[0] }}" class="px-4 py-2 rounded-lg text-xs font-semibold transition-colors
+            {% if filter_status == s[0] %}bg-navy text-white{% else %}bg-white border border-slate-200 text-slate-600 hover:border-navy{% endif %}">
+            {{ s[1] }}
+        </a>
+        {% endfor %}
+    </div>
+
+    <div class="space-y-4">
+        {% for r in requests %}
+        <div class="portal-card p-5">
+            <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                <div class="flex-1">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="badge badge-navy capitalize">{{ r.leave_type }}</span>
+                        <span class="badge {% if r.status == 'approved' %}badge-success{% elif r.status == 'rejected' %}badge-danger{% else %}badge-warning{% endif %} capitalize">{{ r.status }}</span>
+                    </div>
+                    <h3 class="font-bold text-navy">{{ r.student_name }} <span class="text-slate-400 font-mono text-sm font-normal">({{ r.student_roll }})</span></h3>
+                    <p class="text-sm text-slate-600 mt-2">{{ r.reason }}</p>
+                    <div class="flex gap-4 mt-3 text-xs text-slate-400">
+                        <span>{{ r.from_date.strftime('%d %b') }} &mdash; {{ r.to_date.strftime('%d %b %Y') }}</span>
+                        <span>{{ r.department }} &bull; Sem {{ r.semester }}</span>
+                        <span>Applied {{ r.created_at.strftime('%d %b %Y') }}</span>
+                    </div>
+                </div>
+                {% if r.status == 'pending' %}
+                <div class="flex flex-col gap-2 sm:w-48 shrink-0">
+                    <form method="POST" class="space-y-2">
+                        <input type="hidden" name="leave_id" value="{{ r._id }}">
+                        <input type="text" name="review_note" placeholder="Optional note..." class="form-input text-xs">
+                        <div class="flex gap-2">
+                            <button type="submit" name="action" value="approved" class="flex-1 py-2 bg-emerald-600 text-white text-xs font-bold rounded-lg hover:bg-emerald-700">Approve</button>
+                            <button type="submit" name="action" value="rejected" class="flex-1 py-2 bg-red-500 text-white text-xs font-bold rounded-lg hover:bg-red-600">Reject</button>
+                        </div>
+                    </form>
+                </div>
+                {% elif r.review_note %}
+                <p class="text-xs text-slate-500 italic sm:w-48">"{{ r.review_note }}"</p>
+                {% endif %}
+            </div>
+        </div>
+        {% else %}
+        <div class="portal-card p-12 text-center text-slate-400">No leave requests found.</div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

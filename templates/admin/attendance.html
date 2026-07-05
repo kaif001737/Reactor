@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% block title %}Attendance Logs Overview | MeasiConnect{% endblock %}
+{% block section_title %}Attendance Logs{% endblock %}
+
+{% block content %}
+<div class="space-y-6 max-w-6xl mx-auto">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h1 class="text-xl font-black text-slate-800 dark:text-white">College Attendance Audit Logs</h1>
+            <p class="text-slate-500 dark:text-slate-400 text-xs">Verify hour-to-hour class attendance logs marked by faculty members. Search and filter logs across academic terms.</p>
+        </div>
+    </div>
+
+    <!-- Filters Panel Form -->
+    <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200/60 dark:border-slate-700/50 shadow-sm">
+        <form method="GET" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 items-end">
+            <div>
+                <label class="block text-[10px] font-black uppercase tracking-wider text-slate-455 mb-1.5">Department</label>
+                <select name="department" class="w-full rounded-xl border border-slate-250 bg-slate-50 dark:bg-slate-700 px-3 py-2 text-xs text-slate-800 dark:text-slate-100 focus:outline-none">
+                    <option value="">All Departments</option>
+                    {% for d in departments %}
+                    <option value="{{ d }}" {% if filter_dept == d %}selected{% endif %}>{{ d }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-[10px] font-black uppercase tracking-wider text-slate-455 mb-1.5">Semester</label>
+                <select name="semester" class="w-full rounded-xl border border-slate-250 bg-slate-50 dark:bg-slate-700 px-3 py-2 text-xs text-slate-800 dark:text-slate-100 focus:outline-none">
+                    <option value="">All Semesters</option>
+                    {% for s in range(1, 7) %}
+                    <option value="{{ s }}" {% if filter_sem|string == s|string %}selected{% endif %}>Semester {{ s }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-[10px] font-black uppercase tracking-wider text-slate-455 mb-1.5">Class Hour</label>
+                <select name="hour" class="w-full rounded-xl border border-slate-250 bg-slate-50 dark:bg-slate-700 px-3 py-2 text-xs text-slate-800 dark:text-slate-100 focus:outline-none">
+                    <option value="">All Hours</option>
+                    {% for h in range(1, 6) %}
+                    <option value="{{ h }}" {% if filter_hour|string == h|string %}selected{% endif %}>Hour {{ h }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-[10px] font-black uppercase tracking-wider text-slate-455 mb-1.5">Date</label>
+                <input type="date" name="date" value="{{ filter_date }}"
+                       class="w-full rounded-xl border border-slate-250 bg-slate-50 dark:bg-slate-700 px-3 py-2 text-xs text-slate-850 dark:text-slate-100 focus:outline-none">
+            </div>
+            <div class="flex gap-2">
+                <button type="submit" class="flex-1 px-4 py-2.5 bg-primary-600 hover:bg-primary-500 text-white rounded-xl text-xs font-bold shadow-md transition-colors">Filter</button>
+                <a href="{{ url_for('admin.attendance_overview') }}" class="flex-1 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-650 text-slate-700 dark:text-slate-200 rounded-xl text-center text-xs font-bold transition-colors">Clear</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Stats summary matching filter -->
+    <div class="grid grid-cols-3 gap-4">
+        <div class="bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-xl text-center">
+            <p class="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400">{{ stats.present }}</p>
+            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">Present Hours</p>
+        </div>
+        <div class="bg-rose-500/10 border border-rose-500/20 p-4 rounded-xl text-center">
+            <p class="text-2xl font-extrabold text-rose-600 dark:text-rose-400">{{ stats.absent }}</p>
+            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">Absent Hours</p>
+        </div>
+        <div class="bg-amber-500/10 border border-amber-500/20 p-4 rounded-xl text-center">
+            <p class="text-2xl font-extrabold text-amber-600 dark:text-amber-400">{{ stats.late }}</p>
+            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">Late Hours</p>
+        </div>
+    </div>
+
+    <!-- Logs Table list -->
+    <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/60 dark:border-slate-700/50 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs border-collapse">
+                <thead>
+                    <tr class="bg-slate-50 dark:bg-slate-900/40 border-b border-slate-200/60 dark:border-slate-700/60 text-slate-400 font-black uppercase tracking-wider">
+                        <th class="px-4 py-4">Date / Hour</th>
+                        <th class="px-4 py-4">Register No</th>
+                        <th class="px-4 py-4">Student</th>
+                        <th class="px-4 py-4">Course Info</th>
+                        <th class="px-4 py-4">Subject</th>
+                        <th class="px-4 py-4">Faculty Marker</th>
+                        <th class="px-4 py-4 text-center">Status</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50 font-medium">
+                    {% for r in records %}
+                    <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-750/10 transition-colors">
+                        <td class="px-4 py-4 font-bold text-slate-800 dark:text-slate-100">
+                            <span>{{ r.date.strftime('%Y-%m-%d') if r.date else 'N/A' }}</span>
+                            <span class="text-[9px] text-slate-400 font-bold block mt-0.5">Period Hour {{ r.hour or 1 }}</span>
+                        </td>
+                        <td class="px-4 py-4 font-mono text-slate-500 font-bold">{{ r.student_roll }}</td>
+                        <td class="px-4 py-4 font-extrabold text-slate-850 dark:text-slate-100">{{ r.student_name }}</td>
+                        <td class="px-4 py-4 text-slate-600 dark:text-slate-400">
+                            {{ r.department }} Sem {{ r.semester }}
+                        </td>
+                        <td class="px-4 py-4 font-bold text-primary-650 dark:text-primary-400">{{ r.subject }}</td>
+                        <td class="px-4 py-4 text-slate-450">{{ r.staff_name }}</td>
+                        <td class="px-4 py-4 text-center">
+                            <span class="px-2 py-0.5 text-[9px] font-black rounded uppercase tracking-wider
+                                {% if r.status == 'present' %}bg-emerald-100 text-emerald-800 dark:bg-emerald-950/20 dark:text-emerald-400
+                                {% elif r.status == 'late' %}bg-amber-100 text-amber-800 dark:bg-amber-950/20 dark:text-amber-400
+                                {% else %}bg-rose-100 text-rose-800 dark:bg-rose-950/20 dark:text-rose-400{% endif %}">{{ r.status }}</span>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="7" class="px-4 py-12 text-center text-slate-400 font-semibold">No attendance log records match the current filter query.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
